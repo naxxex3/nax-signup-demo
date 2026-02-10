@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Responsive Login & Signup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+  --accent: #8b5cf6;
+  --accent2: #22d3ee;
+  --bg: #0f172a;
+  --glass: rgba(255,255,255,.08);
+  --border: rgba(255,255,255,.18);
+}
+
+* {
+  box-sizing: border-box;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(600px at 20% 10%, #1e1b4b, transparent),
+    radial-gradient(800px at 80% 90%, #164e63, transparent),
+    var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  color: #fff;
+}
+
+.auth {
+  width: 100%;
+  max-width: 380px;
+  border-radius: 22px;
+  padding: 24px;
+  background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.03));
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  box-shadow: 0 30px 60px rgba(0,0,0,.4);
+}
+
+.header {
+  display: flex;
+  gap: 8px;
+  background: rgba(255,255,255,.06);
+  border-radius: 14px;
+  padding: 6px;
+  margin-bottom: 22px;
+}
+
+.header button {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: .6;
+  transition: .3s;
+}
+
+.header button.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  opacity: 1;
+}
+
+form {
+  display: none;
+  animation: fade .35s ease;
+}
+
+form.active {
+  display: block;
+}
+
+@keyframes fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.field {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.field input {
+  width: 100%;
+  padding: 16px 14px;
+  border-radius: 14px;
+  background: var(--glass);
+  border: 1px solid transparent;
+  color: #fff;
+  outline: none;
+  font-size: 15px;
+  transition: .3s;
+}
+
+.field label {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  opacity: .6;
+  pointer-events: none;
+  transition: .3s;
+}
+
+.field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(139,92,246,.15);
+}
+
+.field input:focus + label,
+.field input:not(:placeholder-shown) + label {
+  top: -7px;
+  font-size: 12px;
+  background: var(--bg);
+  padding: 0 6px;
+  opacity: 1;
+}
+
+.submit {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #000;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.message {
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  display: none;
+}
+
+.message.success {
+  display: block;
+  background: rgba(34,211,238,.15);
+  color: #67e8f9;
+}
+
+.message.error {
+  display: block;
+  background: rgba(248,113,113,.15);
+  color: #fca5a5;
+}
+
+@media (max-width: 360px) {
+  .auth { padding: 18px; }
+  .header button { padding: 10px; font-size: 14px; }
+  .field input { padding: 14px 12px; }
+}
+
+@media (min-width: 768px) {
+  body { padding: 32px; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="auth">
+  <div class="header">
+    <button id="loginTab" class="active">Login</button>
+    <button id="signupTab">Sign up</button>
+  </div>
+
+  <!-- LOGIN -->
+  <form id="loginForm" class="active">
+    <div class="message" id="loginMsg"></div>
+    <div class="field">
+      <input type="email" id="loginEmail" placeholder=" " required>
+      <label>Email</label>
+    </div>
+    <div class="field">
+      <input type="password" id="loginPass" placeholder=" " required>
+      <label>Password</label>
+    </div>
+    <button class="submit">Login</button>
+  </form>
+
+  <!-- SIGNUP -->
+  <form id="signupForm">
+    <div class="message" id="signupMsg"></div>
+    <div class="field">
+      <input type="text" id="name" placeholder=" " required>
+      <label>Name</label>
+    </div>
+    <div class="field">
+      <input type="email" id="signupEmail" placeholder=" " required>
+      <label>Email</label>
+    </div>
+    <div class="field">
+      <input type="password" id="signupPass" placeholder=" " required>
+      <label>Password</label>
+    </div>
+    <button class="submit">Create account</button>
+  </form>
+</div>
+
+<script>
+const loginTab = document.getElementById("loginTab");
+const signupTab = document.getElementById("signupTab");
+const loginForm = document.getElementById("loginForm");
+const signupForm = document.getElementById("signupForm");
+const loginMsg = document.getElementById("loginMsg");
+const signupMsg = document.getElementById("signupMsg");
+
+function clearMessages() {
+  [loginMsg, signupMsg].forEach(m => {
+    m.textContent = "";
+    m.className = "message";
+  });
+}
+
+function show(msgDiv, text, type) {
+  msgDiv.textContent = text;
+  msgDiv.classList.add(type); // "success" or "error"
+}
+
+loginTab.onclick = () => {
+  loginTab.classList.add("active");
+  signupTab.classList.remove("active");
+  loginForm.classList.add("active");
+  signupForm.classList.remove("active");
+  clearMessages();
+};
+
+signupTab.onclick = () => {
+  signupTab.classList.add("active");
+  loginTab.classList.remove("active");
+  signupForm.classList.add("active");
+  loginForm.classList.remove("active");
+  clearMessages();
+};
+
+const BASE_URL = "http://localhost:3000";
+
+loginForm.onsubmit = async e => {
+  e.preventDefault();
+  clearMessages();
+
+  const data = {
+    email: loginEmail.value,
+    password: loginPass.value
+  };
+
+  try {
+    const res = await fetch(`${BASE_URL}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    show(loginMsg, result.message, result.success ? "success" : "error");
+  } catch (err) {
+    show(loginMsg, "Network error", "error");
+  }
+};
+
+signupForm.onsubmit = async e => {
+  e.preventDefault();
+  clearMessages();
+
+  const nameInput = document.getElementById("name");
+  const signupEmail = document.getElementById("signupEmail");
+  const signupPass = document.getElementById("signupPass");
+
+  if (!nameInput.value || !signupEmail.value || !signupPass.value) {
+    show(signupMsg, "All fields are required", "error");
+    return;
+  }
+
+  if (signupPass.value.length < 6) {
+    show(signupMsg, "Password must be at least 6 characters", "error");
+    return;
+  }
+
+  const data = {
+    name: nameInput.value,
+    email: signupEmail.value,
+    password: signupPass.value
+  };
+
+  try {
+    const res = await fetch(`${BASE_URL}/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    show(signupMsg, result.message, result.success ? "success" : "error");
+  } catch (err) {
+    show(signupMsg, "Network error", "error");
+  }
+};
+
+</script>
+
+</body>
+</html>
